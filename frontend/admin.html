@@ -16,6 +16,17 @@
     .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     #totalDisplay { font-size: 1.2em; font-weight: bold; }
     #liveToggle { margin-left: 10px; }
+    textarea {
+  width: 100%;
+  min-height: 30px;
+  resize: vertical;
+  background: #1e1e1e;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 5px;
+  font-size: 14px;
+}
+
   </style>
 </head>
 <body>
@@ -92,7 +103,9 @@
         row.innerHTML = `
           <td>${d.id}</td>
           <td>${d.name || 'Anonymous'}</td>
-          <td><input value="${d.message || ''}" onchange="editMessage(${d.id}, this.value)"></td>
+          <td>
+  <textarea oninput="autoResize(this)" onchange="editMessage(${d.id}, this.value)">${d.message || ''}</textarea>
+</td>
           <td>£${d.amount}</td>
           <td>${new Date(d.timestamp).toLocaleString()}</td>
           <td><button onclick="refundDonation(${d.id})">Refund</button></td>
@@ -133,6 +146,12 @@
     function goToMain() {
       window.location.href = 'index.html';
     }
+
+    function autoResize(el) {
+  el.style.height = 'auto';       // Reset height
+  el.style.height = el.scrollHeight + 'px'; // Adjust to content
+}
+
   </script>
 </body>
 </html>
