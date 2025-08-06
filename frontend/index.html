@@ -1,171 +1,30 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang=""en"">
 <head>
-  <title>Donations</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset=""UTF-8"" />
+<meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+<title>Donations</title>
+<link rel=""stylesheet"" href=""css/style.css"" />
 </head>
-<!-- Admin toolbar button (hidden by default) -->
-<a href="admin.html" id="admin-button" title="Admin Dashboard">⚙️</a>
-
-<style>
-  #admin-button {
-    position: fixed;
-    bottom: 15px;
-    left: 15px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    font-size: 20px;
-    text-decoration: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    opacity: 0;                 /* Start hidden */
-    pointer-events: none;       /* Unclickable until visible */
-    transition: opacity 0.3s ease, background 0.2s ease;
-    z-index: 1000;
-  }
-  #admin-button.visible {
-    opacity: 0.4;
-    pointer-events: auto;       /* Enable click */
-  }
-  #admin-button.visible:hover {
-    opacity: 1;
-    background: rgba(0,0,0,0.8);
-  }
-</style>
-
-<script>
-  // Toggle admin button visibility with Shift + Alt + A
-  document.addEventListener('keydown', (e) => {
-    if (e.shiftKey && e.altKey && e.key.toLowerCase() === 'a') {
-      const btn = document.getElementById('admin-button');
-      btn.classList.toggle('visible');
-    }
-  });
-</script>
-
-</style>
 <body>
-  <div class="container three-column">
-
-    <div class="column recent">
-      <h2>Recent Donations</h2>
-      <ul id="recent"></ul>
-    </div>
-
-    <div class="column donate">
-      <h1>Total Raised For the brokie known as Psycho: $<span id="total">0</span></h1>
-      <div class="donate-box">
-        <h2>Donate</h2>
-        <input type="text" id="name" placeholder="Your Name (optional)">
-        <textarea id="message" placeholder="Message (optional)"></textarea>
-        <input type="number" id="amount" placeholder="Amount ($)">
-        <button id="donateBtn">Donate</button>
-        <div class="payment-buttons">
-          <button disabled>PayPal (Coming Soon)</button>
-          <button disabled>Credit Card (Coming Soon)</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="column leaderboard">
-      <h2>Top Donators</h2>
-      <ul id="leaderboard"></ul>
-    </div>
-
+<div class=""container"">
+  <div class=""column recent"">
+    <h2>Recent Donations</h2>
+    <ul id=""recent""></ul>
   </div>
-<!-- Easter Egg Banner -->
-<div id="easter-egg" style="
-  display:none;
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#000;
-  padding:10px 20px;
-  border-radius:8px;
-  font-size:14px;
-  font-weight:bold;
-  opacity:0;
-  transition:opacity 0.5s ease;
-  z-index:1000;
-  background-image: linear-gradient(
-    90deg,
-    red, orange, yellow, green, blue, indigo, violet, red
-  );
-  background-size: 400%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: rainbow 3s linear infinite;
-">
-  Built with ❤️ by Wavier & ChaosGPT
+  <div class=""column donate"">
+    <h1>Total Raised: $<span id=""total"">0</span></h1>
+    <h2>Donate</h2>
+    <input type=""text"" id=""name"" placeholder=""Your Name (optional)"" />
+    <textarea id=""message"" placeholder=""Message (optional)""></textarea>
+    <input type=""number"" id=""amount"" placeholder=""Amount ($)"" min=""0.01"" step=""0.01"" />
+    <button id=""donateBtn"">Donate</button>
+  </div>
+  <div class=""column top"">
+    <h2>Top Donators</h2>
+    <ol id=""topDonators""></ol>
+  </div>
 </div>
-
-<style>
-@keyframes rainbow {
-  0% { background-position: 0% }
-  100% { background-position: 400% }
-}
-</style>
-
-<!-- Confetti library -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
-<script>
-  // Konami code sequence
-  const konami = [
-    'ArrowUp','ArrowUp','ArrowDown','ArrowDown',
-    'ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'
-  ];
-  let input = [];
-
-  document.addEventListener('keydown', (e) => {
-    input.push(e.key);
-    if (input.length > konami.length) input.shift();
-
-    if (JSON.stringify(input) === JSON.stringify(konami)) {
-      showEasterEgg();
-      input = [];
-    }
-  });
-
-  function showEasterEgg() {
-    const egg = document.getElementById('easter-egg');
-    egg.style.display = 'block';
-    setTimeout(() => egg.style.opacity = '1', 10);
-
-    // Confetti burst (5 waves)
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      }, i * 300);
-    }
-//temp for confetti
-if (typeof confetti === 'function') {
-  for (let i = 0; i < 5; i++) {
-    setTimeout(() => {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    }, i * 300);
-  }
-}
-
-//tempend
-    // Hide after 4 seconds
-    setTimeout(() => {
-      egg.style.opacity = '0';
-      setTimeout(() => egg.style.display = 'none', 500);
-    }, 4000);
-  }
-</script>
-<script src="js/main.js"></script>
-
+<script src=""js/main.js""></script>
 </body>
 </html>

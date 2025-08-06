@@ -1,7 +1,0 @@
-{
-  "name": "donation-site",
-  "version": "1.0.0",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.44.4"
-  }
-}
