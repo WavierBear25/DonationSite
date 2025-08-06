@@ -28,28 +28,45 @@
   </section>
 </div>
 <script src="js/main.js"></script>
+
+
 //admin page
+<!-- Hidden admin button -->
+<a href="admin.html" id="admin-button" title="Admin Dashboard" style="
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 24px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  text-decoration: none;
+  z-index: 9999;
+">⚙️</a>
+
 <script>
-  (() => {
-    const konamiCode = [38,38,40,40,37,39,37,39,66,65]; // Up Up Down Down Left Right Left Right B A
-    let inputBuffer = [];
+  const adminBtn = document.getElementById('admin-button');
+  let keysPressed = new Set();
 
-    function showAdminLogin() {
-      // Redirect to admin page or show login button
-      window.location.href = 'admin.html';
+  window.addEventListener('keydown', (e) => {
+    keysPressed.add(e.key);
+
+    // Check if Shift + Alt + A are all pressed
+    if (keysPressed.has('Shift') && keysPressed.has('Alt') && keysPressed.has('a')) {
+      adminBtn.style.opacity = '1';
+      adminBtn.style.pointerEvents = 'auto';
     }
+  });
 
-    window.addEventListener('keydown', (e) => {
-      inputBuffer.push(e.keyCode);
-      if (inputBuffer.length > konamiCode.length) {
-        inputBuffer.shift();
-      }
-      if (inputBuffer.toString() === konamiCode.toString()) {
-        showAdminLogin();
-      }
-    });
-  })();
+  window.addEventListener('keyup', (e) => {
+    keysPressed.delete(e.key);
+  });
 </script>
+
 
 
 </body>
