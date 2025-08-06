@@ -28,5 +28,29 @@
   </section>
 </div>
 <script src="js/main.js"></script>
+//admin page
+<script>
+  (() => {
+    const konamiCode = [38,38,40,40,37,39,37,39,66,65]; // Up Up Down Down Left Right Left Right B A
+    let inputBuffer = [];
+
+    function showAdminLogin() {
+      // Redirect to admin page or show login button
+      window.location.href = 'admin.html';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      inputBuffer.push(e.keyCode);
+      if (inputBuffer.length > konamiCode.length) {
+        inputBuffer.shift();
+      }
+      if (inputBuffer.toString() === konamiCode.toString()) {
+        showAdminLogin();
+      }
+    });
+  })();
+</script>
+
+
 </body>
 </html>

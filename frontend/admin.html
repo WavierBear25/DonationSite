@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Dashboard</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #f5f5f5;
+    color: #222;
+  }
+  #loginSection, #adminSection {
+    max-width: 700px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  #loginSection input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+  }
+  #loginSection button {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+  #adminSection {
+    display: none;
+  }
+  #adminHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #adminHeader h1 {
+    margin: 0;
+  }
+  #adminHeader button {
+    padding: 8px 16px;
+    font-size: 1rem;
+  }
+  #totalRaised {
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  label {
+    font-weight: bold;
+  }
+  #liveToggle {
+    margin-left: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+  }
+  textarea {
+    width: 100%;
+    resize: vertical;
+  }
+  button.refundBtn, button.saveBtn {
+    margin-right: 5px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div id="loginSection">
+  <h2>Admin Login</h2>
+  <input type="password" id="adminPassword" placeholder="Enter admin password" />
+  <button id="loginBtn">Login</button>
+  <p id="loginError" style="color:red; display:none;">Incorrect password. Try again.</p>
+</div>
+
+<div id="adminSection">
+  <div id="adminHeader">
+    <h1>Admin Dashboard</h1>
+    <button id="logoutBtn">Logout</button>
+  </div>
+  <div>
+    <span id="totalRaised">Total Raised: $0.00</span>
+    <label>
+      Live Updates
+      <input type="checkbox" id="liveToggle" checked />
+    </label>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Amount ($)</th>
+        <th>Message</th>
+        <th>Timestamp</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="donationsTableBody">
+      <!-- Donations will populate here -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+(() => {
+  const adminPassword = '1234'; // Change this to your real password!
+  const loginSection = document.getElementById('loginSection');
+  const adminSection = document.getElementById('adminSection');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginError = document.getElementById('loginError');
+  const passwordInput = document.getElementById('adminPassword');
+  const donationsTableBody = document.getElementById('donationsTableBody');
+  const totalRaisedSpan = document.getElementById('totalRaised');
+  const liveToggle = document.getElementById('liveToggle');
+
+  let donations = [];
+  let liveUpdates = true;
+  let liveInterval;
+
+  function fetchDonations() {
+    fetch('/api/stats')
+      .then(res => res.json())
+      .then(data => {
+        donations = data;
+        renderDonations();
+      })
+      .catch(console.error);
+  }
+
+  function renderDonations() {
+    donationsTableBody.innerHTML = '';
+    let total = 0;
+
+    donations.forEach((d, idx) => {
+      total += Number(d.amount);
+
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td><input type="text" value="${d.name || ''}" data-index="${idx}" data-field="name" /></td>
+        <td><input type="number" step="0.01" value="${d.amount}" data-index="${idx}" data-field="amount" /></td>
+        <td><textarea rows="2" data-index="${idx}" data-field="message">${d.message || ''}</textarea></td>
+        <td>${new Date(d.timestamp).toLocaleString()}</td>
+        <td>
+          <button class="saveBtn" data-index="${idx}">Save</button>
+          <button class="refundBtn" data-index="${idx}">Refund</button>
+        </td>
+      `;
+
+      donationsTableBody.appendChild(tr);
+    });
+
+    totalRaisedSpan.textContent = `Total Raised: $${total.toFixed(2)}`;
+
+    attachRowListeners();
+  }
+
+  function attachRowListeners() {
+    const saveBtns = document.querySelectorAll('.saveBtn');
+    const refundBtns = document.querySelectorAll('.refundBtn');
+
+    saveBtns.forEach(btn => {
+      btn.onclick = () => {
+        const idx = btn.dataset.index;
+        const row = donationsTableBody.children[idx];
+        const updated = {
+          name: row.querySelector('[data-field="name"]').value,
+          amount: parseFloat(row.querySelector('[data-field="amount"]').value),
+          message: row.querySelector('[data-field="message"]').value,
+          id: donations[idx].id,
+        };
+        // Send update to backend (simulate for now)
+        // TODO: Replace with real API call to update donation
+        donations[idx] = { ...donations[idx], ...updated };
+        alert('Donation updated locally (simulate API call).');
+        renderDonations();
+      };
+    });
+
+    refundBtns.forEach(btn => {
+      btn.onclick = () => {
+        const idx = btn.dataset.index;
+        // Send refund request to backend (simulate for now)
+        // TODO: Replace with real API call to refund donation
+        donations.splice(idx, 1);
+        alert('Donation refunded locally (simulate API call).');
+        renderDonations();
+      };
+    });
+  }
+
+  loginBtn.addEventListener('click', () => {
+    if (passwordInput.value === adminPassword) {
+      loginSection.style.display = 'none';
+      adminSection.style.display = 'block';
+      loginError.style.display = 'none';
+      fetchDonations();
+      startLiveUpdates();
+    } else {
+      loginError.style.display = 'block';
+    }
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    adminSection.style.display = 'none';
+    loginSection.style.display = 'block';
+    passwordInput.value = '';
+    stopLiveUpdates();
+  });
+
+  liveToggle.addEventListener('change', () => {
+    liveUpdates = liveToggle.checked;
+    if (liveUpdates) {
+      startLiveUpdates();
+    } else {
+      stopLiveUpdates();
+    }
+  });
+
+  function startLiveUpdates() {
+    if (liveInterval) return;
+    liveInterval = setInterval(fetchDonations, 5000);
+  }
+
+  function stopLiveUpdates() {
+    if (!liveInterval) return;
+    clearInterval(liveInterval);
+    liveInterval = null;
+  }
+})();
+</script>
+
+</body>
+</html>
