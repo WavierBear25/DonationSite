@@ -29,3 +29,34 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: 'Server crashed: ' + err.message });
   }
 };
+
+//temp
+document.getElementById('donateBtn').addEventListener('click', async () => {
+  console.log("Donate button clicked");
+
+  const name = document.getElementById('name').value;
+  const message = document.getElementById('message').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+
+  console.log("Donation details:", { name, message, amount });
+
+  try {
+    const res = await fetch('/api/donate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, message, amount })
+    });
+
+    console.log("API response status:", res.status);
+
+    const data = await res.json();
+    if (res.ok) {
+      alert('Donation successful!');
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (err) {
+    console.error("Donation error:", err);
+    alert('Donation failed (check console)');
+  }
+});
