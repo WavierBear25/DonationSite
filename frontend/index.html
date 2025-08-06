@@ -144,7 +144,20 @@
         });
       }, i * 300);
     }
+//temp for confetti
+if (typeof confetti === 'function') {
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }, i * 300);
+  }
+}
 
+//tempend
     // Hide after 4 seconds
     setTimeout(() => {
       egg.style.opacity = '0';
