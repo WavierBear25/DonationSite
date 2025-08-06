@@ -73,8 +73,7 @@
     </div>
 
   </div>
-
-  <!-- Easter Egg Banner -->
+<!-- Easter Egg Banner -->
 <div id="easter-egg" style="
   display:none;
   position:fixed;
@@ -82,7 +81,6 @@
   left:50%;
   transform:translateX(-50%);
   background:#000;
-  color:#fff;
   padding:10px 20px;
   border-radius:8px;
   font-size:14px;
@@ -95,13 +93,10 @@
     red, orange, yellow, green, blue, indigo, violet, red
   );
   background-size: 400%;
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: rainbow 3s linear infinite;
-  background-clip: text;
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-
 ">
   Built with ❤️ by Wavier & ChaosGPT
 </div>
@@ -113,7 +108,9 @@
 }
 </style>
 
+<!-- Confetti library -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
 <script>
   // Konami code sequence
   const konami = [
@@ -137,7 +134,7 @@
     egg.style.display = 'block';
     setTimeout(() => egg.style.opacity = '1', 10);
 
-    // Confetti burst
+    // Confetti burst (5 waves)
     for (let i = 0; i < 5; i++) {
       setTimeout(() => {
         confetti({
