@@ -1,4 +1,8 @@
-/* Reset and base */
+const { writeFileSync } = require('fs');
+const { join } = require('path');
+const { execSync } = require('child_process');
+
+const styleCss = `/* Reset and base */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -107,4 +111,55 @@ h1 span#total {
   .column {
     max-height: none;
   }
+}
+`;
+
+const indexHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Donations</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="container">
+  <section class="column donate">
+    <h1>Total Raised: $<span id="total">0</span></h1>
+    <h2>Make a Donation</h2>
+    <input type="text" id="name" placeholder="Your Name (optional)" autocomplete="name" />
+    <textarea id="message" placeholder="Message (optional)" autocomplete="off"></textarea>
+    <input type="number" id="amount" placeholder="Amount ($)" min="0.01" step="0.01" />
+    <button id="donateBtn">Donate</button>
+  </section>
+
+  <section class="column recent">
+    <h2>Recent Donations</h2>
+    <ul id="recent"></ul>
+  </section>
+
+  <section class="column top">
+    <h2>Top Donators</h2>
+    <ol id="topDonators"></ol>
+  </section>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>`;
+
+const stylePath = join(process.cwd(), 'frontend', 'css', 'style.css');
+const indexPath = join(process.cwd(), 'frontend', 'index.html');
+
+writeFileSync(stylePath, styleCss, 'utf8');
+writeFileSync(indexPath, indexHtml, 'utf8');
+
+console.log('Updated style.css and index.html');
+
+try {
+  execSync('git add .; git commit -m "Update main page style and structure"; git push origin main', {
+    stdio: 'inherit',
+    shell: 'powershell.exe'
+  });
+} catch (err) {
+  console.error('Git push failed:', err.message);
 }
