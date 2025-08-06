@@ -2,18 +2,15 @@ const { mkdirSync, writeFileSync } = require('fs');
 const { join } = require('path');
 const { execSync } = require('child_process');
 
-// --- Helper function ---
 function createFile(path, content) {
   mkdirSync(require('path').dirname(path), { recursive: true });
   writeFileSync(path, content);
-  console.log(`Created: ${path}`);
+  console.log(`Updated: ${path}`);
 }
 
-// --- Paths ---
 const frontendDir = join(process.cwd(), 'frontend');
-const apiDir = join(process.cwd(), 'api');
 
-// --- 1. Admin HTML ---
+// --- Overwrite admin.html ---
 createFile(join(frontendDir, 'admin.html'), `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,6 +26,21 @@ createFile(join(frontendDir, 'admin.html'), `<!DOCTYPE html>
     button { margin: 0 5px; padding: 5px 10px; cursor: pointer; }
     input, textarea { padding: 5px; }
     .login-box { max-width: 300px; margin: 50px auto; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    #totalDisplay { font-size: 1.2em; font-weight: bold; }
+    #liveToggle { margin-left: 10px; }
+    textarea {
+      width: 100%;
+      min-height: 30px;
+      resize: vertical;
+      background: #1e1e1e;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 5px;
+      font-size: 14px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -40,6 +52,16 @@ createFile(join(frontendDir, 'admin.html'), `<!DOCTYPE html>
   </div>
 
   <div id="dashboard" class="hidden">
+    <div class="toolbar">
+      <div>
+        <span id="totalDisplay">Total Raised: £0</span>
+        <label>
+          <input type="checkbox" id="liveToggle" onchange="toggleLiveUpdates()"> Live Updates
+        </label>
+      </div>
+      <button onclick="goToMain()">← Back to Main</button>
+    </div>
+
     <h2>Donations Dashboard</h2>
     <table>
       <thead>
@@ -58,6 +80,7 @@ createFile(join(frontendDir, 'admin.html'), `<!DOCTYPE html>
 
   <script>
     const API = '/api';
+    let liveInterval = null;
 
     async function login() {
       const password = document.getElementById('password').value;
@@ -81,6 +104,19 @@ createFile(join(frontendDir, 'admin.html'), `<!DOCTYPE html>
       const token = localStorage.getItem('adminToken');
       const res = await fetch(\`\${API}/admin-donations?token=\${token}\`);
       const data = await res.json();
+
+      if (data.error) {
+        alert('Session expired or unauthorized.');
+        localStorage.removeItem('adminToken');
+        location.reload();
+        return;
+      }
+
+      // Calculate total
+      const total = data.reduce((sum, d) => sum + parseFloat(d.amount || 0), 0);
+      document.getElementById('totalDisplay').innerText = \`Total Raised: £\${total}\`;
+
+      // Populate table
       const table = document.getElementById('donationsTable');
       table.innerHTML = '';
       data.forEach(d => {
@@ -88,14 +124,18 @@ createFile(join(frontendDir, 'admin.html'), `<!DOCTYPE html>
         row.innerHTML = \`
           <td>\${d.id}</td>
           <td>\${d.name || 'Anonymous'}</td>
-          <td><input value="\${d.message || ''}" onchange="editMessage(\${d.id}, this.value)"></td>
+          <td>
+            <textarea oninput="autoResize(this)" onchange="editMessage(\${d.id}, this.value)">\${d.message || ''}</textarea>
+          </td>
           <td>£\${d.amount}</td>
           <td>\${new Date(d.timestamp).toLocaleString()}</td>
-          <td>
-            <button onclick="refundDonation(\${d.id})">Refund</button>
-          </td>
+          <td><button onclick="refundDonation(\${d.id})">Refund</button></td>
         \`;
         table.appendChild(row);
+
+        // Trigger auto-resize immediately
+        const textarea = row.querySelector('textarea');
+        autoResize(textarea);
       });
     }
 
@@ -118,81 +158,32 @@ createFile(join(frontendDir, 'admin.html'), `<!DOCTYPE html>
       });
       fetchDonations();
     }
+
+    function toggleLiveUpdates() {
+      clearInterval(liveInterval);
+      if (document.getElementById('liveToggle').checked) {
+        liveInterval = setInterval(fetchDonations, 5000);
+      }
+    }
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+
+    function goToMain() {
+      window.location.href = 'index.html';
+    }
   </script>
 </body>
 </html>`);
 
-// --- 2. API: admin-login.js ---
-createFile(join(apiDir, 'admin-login.js'), `module.exports = async (req, res) => {
-  const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
-    // Simple token (in real app use JWT)
-    const token = process.env.ADMIN_PASSWORD;
-    return res.status(200).json({ success: true, token });
-  }
-  res.status(401).json({ success: false, error: 'Invalid password' });
-};`);
-
-// --- 3. API: admin-donations.js ---
-createFile(join(apiDir, 'admin-donations.js'), `const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-module.exports = async (req, res) => {
-  const token = req.query.token;
-  if (token !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { data, error } = await supabase
-    .from('donations')
-    .select('*')
-    .order('timestamp', { ascending: false });
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json(data);
-};`);
-
-// --- 4. API: admin-edit.js ---
-createFile(join(apiDir, 'admin-edit.js'), `const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-module.exports = async (req, res) => {
-  const { token, id, message } = req.body;
-  if (token !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { error } = await supabase
-    .from('donations')
-    .update({ message })
-    .eq('id', id);
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json({ success: true });
-};`);
-
-// --- 5. API: admin-refund.js ---
-createFile(join(apiDir, 'admin-refund.js'), `const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-module.exports = async (req, res) => {
-  const { token, id } = req.body;
-  if (token !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const { error } = await supabase
-    .from('donations')
-    .delete()
-    .eq('id', id);
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json({ success: true });
-};`);
-
-// --- Commit & Push to GitHub ---
+// Commit & push
 try {
-  execSync('git add .; git commit -m "Add admin dashboard and APIs"; git push origin main', { stdio: 'inherit', shell: 'powershell.exe' });
-} catch (error) {
-  console.error('Git push failed:', error.message);
+  execSync('git add .; git commit -m "Update admin dashboard with fixes"; git push origin main', {
+    stdio: 'inherit',
+    shell: 'powershell.exe'
+  });
+} catch (err) {
+  console.error('Git push failed:', err.message);
 }

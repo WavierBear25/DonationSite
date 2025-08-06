@@ -17,16 +17,17 @@
     #totalDisplay { font-size: 1.2em; font-weight: bold; }
     #liveToggle { margin-left: 10px; }
     textarea {
-  width: 100%;
-  min-height: 30px;
-  resize: vertical;
-  background: #1e1e1e;
-  color: #fff;
-  border: 1px solid #444;
-  padding: 5px;
-  font-size: 14px;
-}
-
+      width: 100%;
+      min-height: 30px;
+      resize: vertical;
+      background: #1e1e1e;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 5px;
+      font-size: 14px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -91,6 +92,13 @@
       const res = await fetch(`${API}/admin-donations?token=${token}`);
       const data = await res.json();
 
+      if (data.error) {
+        alert('Session expired or unauthorized.');
+        localStorage.removeItem('adminToken');
+        location.reload();
+        return;
+      }
+
       // Calculate total
       const total = data.reduce((sum, d) => sum + parseFloat(d.amount || 0), 0);
       document.getElementById('totalDisplay').innerText = `Total Raised: £${total}`;
@@ -104,13 +112,17 @@
           <td>${d.id}</td>
           <td>${d.name || 'Anonymous'}</td>
           <td>
-  <textarea oninput="autoResize(this)" onchange="editMessage(${d.id}, this.value)">${d.message || ''}</textarea>
-</td>
+            <textarea oninput="autoResize(this)" onchange="editMessage(${d.id}, this.value)">${d.message || ''}</textarea>
+          </td>
           <td>£${d.amount}</td>
           <td>${new Date(d.timestamp).toLocaleString()}</td>
           <td><button onclick="refundDonation(${d.id})">Refund</button></td>
         `;
         table.appendChild(row);
+
+        // Trigger auto-resize immediately
+        const textarea = row.querySelector('textarea');
+        autoResize(textarea);
       });
     }
 
@@ -135,23 +147,20 @@
     }
 
     function toggleLiveUpdates() {
-      const toggle = document.getElementById('liveToggle').checked;
-      if (toggle) {
-        liveInterval = setInterval(fetchDonations, 5000); // refresh every 5s
-      } else {
-        clearInterval(liveInterval);
+      clearInterval(liveInterval);
+      if (document.getElementById('liveToggle').checked) {
+        liveInterval = setInterval(fetchDonations, 5000);
       }
+    }
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
     }
 
     function goToMain() {
       window.location.href = 'index.html';
     }
-
-    function autoResize(el) {
-  el.style.height = 'auto';       // Reset height
-  el.style.height = el.scrollHeight + 'px'; // Adjust to content
-}
-
   </script>
 </body>
 </html>
