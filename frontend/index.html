@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Donations</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container three-column">
+
+    <div class="column recent">
+      <h2>Recent Donations</h2>
+      <ul id="recent"></ul>
+    </div>
+
+    <div class="column donate">
+      <h1>Total Raised: £<span id="total">0</span></h1>
+      <div class="donate-box">
+        <h2>Donate</h2>
+        <input type="text" id="name" placeholder="Your Name (optional)">
+        <textarea id="message" placeholder="Message (optional)"></textarea>
+        <input type="number" id="amount" placeholder="Amount (£)">
+        <button id="donateBtn">Donate</button>
+        <div class="payment-buttons">
+          <button disabled>PayPal (Coming Soon)</button>
+          <button disabled>Credit Card (Coming Soon)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="column leaderboard">
+      <h2>Top Donators</h2>
+      <ul id="leaderboard"></ul>
+    </div>
+
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
