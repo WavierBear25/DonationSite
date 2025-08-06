@@ -4,7 +4,7 @@
   <title>Donations</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<!-- Admin toolbar button -->
+<!-- Admin toolbar button (hidden by default) -->
 <a href="admin.html" id="admin-button" title="Admin Dashboard">⚙️</a>
 
 <style>
@@ -18,14 +18,31 @@
     text-decoration: none;
     padding: 8px 12px;
     border-radius: 8px;
-    opacity: 0.4;
-    transition: opacity 0.2s ease, background 0.2s ease;
+    opacity: 0;                 /* Start hidden */
+    pointer-events: none;       /* Unclickable until visible */
+    transition: opacity 0.3s ease, background 0.2s ease;
     z-index: 1000;
   }
-  #admin-button:hover {
+  #admin-button.visible {
+    opacity: 0.4;
+    pointer-events: auto;       /* Enable click */
+  }
+  #admin-button.visible:hover {
     opacity: 1;
     background: rgba(0,0,0,0.8);
   }
+</style>
+
+<script>
+  // Toggle admin button visibility with Shift + Alt + A
+  document.addEventListener('keydown', (e) => {
+    if (e.shiftKey && e.altKey && e.key.toLowerCase() === 'a') {
+      const btn = document.getElementById('admin-button');
+      btn.classList.toggle('visible');
+    }
+  });
+</script>
+
 </style>
 <body>
   <div class="container three-column">
@@ -36,7 +53,7 @@
     </div>
 
     <div class="column donate">
-      <h1>Total Raised: £<span id="total">0</span></h1>
+      <h1>Total Raised For the brokie known as Psycho: £<span id="total">0</span></h1>
       <div class="donate-box">
         <h2>Donate</h2>
         <input type="text" id="name" placeholder="Your Name (optional)">
