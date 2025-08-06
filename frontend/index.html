@@ -75,5 +75,54 @@
   </div>
 
   <script src="js/main.js"></script>
+  <div id="easter-egg" style="
+  display:none;
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#000;
+  color:#fff;
+  padding:10px 20px;
+  border-radius:8px;
+  font-size:14px;
+  opacity:0;
+  transition:opacity 0.5s ease;
+  z-index:1000;
+">
+  Built with ❤️ by Wavier & ChaosGPT
+</div>
+
+<script>
+  // Konami code sequence
+  const konami = [
+    'ArrowUp','ArrowUp','ArrowDown','ArrowDown',
+    'ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'
+  ];
+  let input = [];
+
+  document.addEventListener('keydown', (e) => {
+    input.push(e.key);
+    if (input.length > konami.length) input.shift();
+
+    if (JSON.stringify(input) === JSON.stringify(konami)) {
+      showEasterEgg();
+      input = [];
+    }
+  });
+
+  function showEasterEgg() {
+    const egg = document.getElementById('easter-egg');
+    egg.style.display = 'block';
+    setTimeout(() => egg.style.opacity = '1', 10);
+
+    // Hide after 4 seconds
+    setTimeout(() => {
+      egg.style.opacity = '0';
+      setTimeout(() => egg.style.display = 'none', 500);
+    }, 4000);
+  }
+</script>
+
 </body>
 </html>
